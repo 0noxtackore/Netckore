@@ -1,0 +1,17 @@
+# Netckore - Ignored files
+# Build artifacts
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+# PyInstaller
+*.manifest
+*.exe
+*.dll
+# OS-specific
+.DS_Store
+Thumbs.db
+# Local config (if any)
+config.json

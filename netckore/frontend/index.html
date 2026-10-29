@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Netckore</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap');
+:root{
+  --bg:#f5f7fb; --card:#ffffff; --panel:#ffffff;
+  --primary:#4a9eff; --accent:#7c5cff; --success:#2dd4a7; --warning:#fbbf24; --danger:#fb7185;
+  --text:#1e293b; --dim:#64748b; --soft:#e2e8f0;
+  --radius:20px; --shadow:0 4px 24px rgba(74,158,255,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);width:100vw;height:100vh;overflow:hidden;padding:28px 36px}
+.app{width:100%;height:100%;max-width:1300px;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.logo{width:56px;height:56px;flex:none;background:linear-gradient(135deg,#4a9eff,#7c5cff);border-radius:var(--radius);display:grid;place-items:center;box-shadow:var(--shadow);animation:floaty 3s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+h1{font-size:28px;font-weight:800;color:var(--text);letter-spacing:-.5px}
+h1 span{color:var(--primary)}
+.subtitle{font-size:14px;color:var(--dim);margin-top:2px;display:block;letter-spacing:.3px}
+.tagline{font-size:12px;color:var(--success);margin-top:8px;display:block;font-weight:500;line-height:1.4}
+.controls{margin-left:auto;display:flex;align-items:center;gap:10px}
+select{padding:8px 14px;border:2px solid var(--soft);border-radius:10px;font-size:13px;font-family:inherit;background:#fff;color:var(--text);cursor:pointer}
+select:hover{border-color:var(--primary)}
+button{padding:8px 20px;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+#diagnoseBtn{background:linear-gradient(135deg,var(--primary),#5ba3f5);color:#fff;box-shadow:0 4px 16px rgba(74,158,255,.3)}
+#diagnoseBtn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(74,158,255,.4)}
+#diagnoseBtn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-row{display:flex;gap:8px}
+.container{display:flex;gap:22px;flex:1;min-height:0}
+.sidebar{width:280px;flex:none;display:flex;flex-direction:column;gap:18px;overflow-y:auto;padding-right:4px}
+.main{flex:1;display:flex;flex-direction:column;gap:18px;overflow-y:auto;min-width:0}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 24px;border:1px solid var(--soft)}
+.card-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
+.card-title svg{width:18px;height:18px;color:var(--primary)}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat-item{background:#fff;border-radius:var(--radius);border:1px solid var(--soft);padding:16px;text-align:center;position:relative;overflow:hidden}
+.stat-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;margin:0 auto 8px;background:rgba(74,158,255,.1)}
+.stat-icon svg{width:20px;height:20px}
+.stat-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.stat-value{font-size:22px;font-weight:800;color:var(--text);margin-top:4px}
+.stat-value.good{color:var(--success)} .stat-value.warn{color:var(--warning)} .stat-value.bad{color:var(--danger)}
+.chips-wrap{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:12px 18px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;border:2px solid transparent;background:var(--soft);transition:all .2s}
+.chip:hover{border-color:var(--primary)}
+.chip.active{background:linear-gradient(135deg,var(--primary),#5ba3f5);color:#fff;box-shadow:0 3px 14px rgba(74,158,255,.2)}
+.chip-check{width:18px;height:18px;flex:none;opacity:0;transition:opacity .2s}
+.chip.active .chip-check{opacity:1;color:var(--success)}
+.progress-bar{height:8px;background:var(--soft);border-radius:4px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.log-area{background:#fff;border-radius:var(--radius);border:1px solid var(--soft);overflow:hidden}
+.log-head{padding:14px 18px;border-bottom:1px solid var(--soft);font-size:13px;font-weight:600;color:var(--text);display:flex;justify-content:space-between;align-items:center}
+.log-body{height:200px;overflow-y:auto;padding:14px 18px;font-family:'Segoe UI',sans-serif;font-size:13px;line-height:1.6;background:linear-gradient(90deg,rgba(74,158,255,.02),transparent)}
+.log-line{display:flex;align-items:center;gap:10px;padding:3px 0;opacity:0}
+.log-line.fade{animation:fadeIn .3s forwards}
+.log-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.log-dot.ok{background:var(--success)}.log-dot.warn{background:var(--warning)}.log-dot.err{background:var(--danger)}.log-dot.info{background:var(--primary)}
+.log-msg{color:var(--text)}.log-msg.ok{color:var(--success)}.log-msg.warn{color:var(--warning)}.log-msg.err{color:var(--danger)}
+.summary-banner{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-radius:var(--radius);padding:18px 24px;box-shadow:0 6px 24px rgba(74,158,255,.25)}
+.summary-icon{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.2);display:grid;place-items:center;margin-right:12px;vertical-align:middle}
+.fix-list{display:flex;flex-direction:column;gap:10px}
+.fix-item{background:#fff;border-radius:var(--radius);border:1px solid var(--soft);padding:14px 18px;display:flex;align-items:flex-start;gap:12px;transition:all .2s}
+.fix-item:hover{border-color:var(--primary)}
+.fix-num{width:30px;height:30px;border-radius:50%;background:rgba(74,158,255,.1);color:var(--primary);font-weight:800;font-size:13px;display:grid;place-items:center;flex:none}
+.fix-body{flex:1}
+.fix-title{font-weight:700;font-size:14px;color:var(--text)}
+.fix-desc{font-size:12px;color:var(--dim);margin-top:3px;line-height:1.5}
+footer{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--dim);padding-top:6px;font-family:inherit}
+.pulse{width:9px;height:9px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;box-shadow:0 0 8px var(--success)}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<div class="logo">
+<svg width="28" height="28" viewBox="0 0 48 48">
+<circle cx="24" cy="24" r="14" fill="#fff" stroke="#fff" stroke-width="2"/>
+<path d="M4 24 H10 M10 24 L14 18 M14 24 L14 12 M14 24 L14 30" stroke="#fff" stroke-width="1.5" opacity=".6"/>
+<path d="M20 24 V16 M20 32 V28 M38 18 A4 4 0 1 0 38 30 A2.5 2.5 0 1 1 38 18 M16 24 A4 4 0 0 1 16 30 A2.5 2.5 0 0 0 16 24 M42 24 A4 4 0 0 0 42 18 A2.5 2.5 0 0 1 42 30" stroke="#fff" stroke-width="1" opacity=".7"/>
+<circle cx="24" cy="24" r="3" fill="#fff"/>
+</svg>
+</div>
+<div>
+<h1><span>Netck</span>ore</h1>
+<span class="subtitle">Diagnóstico y reparación de tu conexión</span>
+<span class="tagline">"La tecnología conecta al mundo. Netckore ayuda a que esa conexión no sea una barrera."</span>
+</div>
+<div class="controls">
+<select id="langSelect"></select>
+<button id="diagBtn">🔍 Diagnostico</button>
+</div>
+</header>
+
+<div class="container">
+<aside class="sidebar">
+<div class="card">
+<div class="card-title"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>Diagnóstico</div>
+<p style="font-size:12px;color:var(--dim);margin-bottom:10px;line-height:1.5">Elige qué verificar y empezá una diagnóstico rápido. Todo se hace en segundos.</p>
+<div class="chips-wrap" id="catChips"></div>
+</div>
+
+<div class="card">
+<div class="card-title"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm0-6H9V4h2v2z"/></svg>Estado en vivo</div>
+<div class="stat-grid">
+<div class="stat-item">
+<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#4a9eff" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8m-4-3v3m4-3v3m-1 8c-3-3 3-6 0-9s-6 3-3 6z"/><circle cx="12" cy="12" r="1.5" fill="#2dd4a7"/></svg></div>
+<div class="stat-label">Conexión</div>
+<div class="stat-value good" id="valConn">✓ Activa</div>
+</div>
+<div class="stat-item">
+<div class="stat-icon"><svg viewBox="0 0 24 24" fill="#4a9eff"><rect x="4" y="10" width="16" height="8" rx="1"/><path d="M7 14h2m4-2v2m0 0l-1-1m1 1l1-1" stroke="#4a9eff" stroke-width="1.5" fill="none"/></svg></div>
+<div class="stat-label">Ping</div>
+<div class="stat-value" id="valPing">16 ms</div>
+</div>
+<div class="stat-item">
+<div class="stat-icon"><svg viewBox="0 0 24 24" fill="#7c5cff"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></div>
+<div class="stat-label">DNS / Router</div>
+<div class="stat-value" id="valDNSPing">OK</div>
+</div>
+</div>
+</div>
+
+<div class="card hidden" id="resultsCard">
+<div class="card-title">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm0-6H9V4h2v2z"/></svg>
+Resumen del diagnóstico
+</div>
+<div class="summary-banner" style="padding:18px;border-radius:0;box-shadow:none;background:linear-gradient(135deg,#2dd4a7,#4a9eff)">
+<div style="display:flex;align-items:center;gap:14px">
+<div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.25);display:grid;place-items:center;color:var(--success)">✅</div>
+<div>
+<div style="font-size:20px;font-weight:800;line-height:1.2" id="sumIcon">🌐 Conexión activa</div>
+<div style="font-size:12px;opacity:.9;margin-top:4px" id="sumText">Todo funciona correctamente</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<section class="card log-area">
+<div class="log-head">
+<span>📋 Registro de diagnóstico</span>
+</div>
+<div class="log-body" id="logBody"></div>
+</section>
+
+<div class="footer">
+<span class="pulse"></span>
+<span>Netckore</span>
+<span style="margin-left:auto;color:var(--primary);font-weight:600">v0.1.0</span>
+<span style="margin-left:8px;font-size:11px;font-style:italic;opacity:.6">by 0noxtackore</span>
+</div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const cats = [
+['connectivity','Conectividad'],['ping','Latencia'],['dns','DNS'],
+['router','Puerta de enlace'],['wifi','WiFi / LAN'],['gateway_fix','Reparar conexión']
+];
+let selected = ['connectivity','ping','dns','router'];
+function renderChips(){
+  const box=$('#catChips'); box.innerHTML='';
+  cats.forEach(([id,label])=>{
+    const b=document.createElement('button'); b.className='chip'+(selected.includes(id)?' active':''); b.innerHTML='<span class="chip-check">✓</span>'+label;
+    b.onclick=()=>{selected=selected.includes(id)?selected.filter(x=>x!==id):[...selected,id];renderChips();};
+    box.appendChild(b);
+  });
+}
+function addLog(time,msg,type){
+  const types={ok:'ok',warn:'warn',err:'err',info:'info'};
+  const box=$('#logBody');
+  const line=document.createElement('div'); line.className='log-line fade';
+  line.innerHTML='<span class="log-dot '+types[type]+'"></span><span>'+msg+'</span>';
+  box.prepend(line); while(box.children.length>300) box.removeChild(box.lastChild);
+}
+function updateStats(s){
+  if(s.online===false)$('#valConn').textContent='✗ Offline';
+  else $('#valConn').textContent='✓ Activa';
+  if(s.pingMs!=null)$('#valPing').textContent=Math.round(s.pingMs)+' ms';
+  else $('#valPing').textContent='-- ms';
+  $('#valDNSPing').textContent=s.dnsOk?'OK':'⚠ Falló';
+}
+async function startDiag(){
+  const btn=$('#diagBtn'); btn.disabled=true; btn.textContent='🔄 Diagnostico...';
+  clearLogs();
+  addLog('--:--:--','Iniciando diagnóstico de red...','info');
+  // Simulating backend responses in real time
+  setTimeout(()=>{addLog('--:--:--','Verificando conectividad a servidores públicos...','info');},300);
+  setTimeout(()=>{addLog('20:14','✓ Conectividad: OK','ok');},800);
+  setTimeout(()=>{addLog('20:14','Mediendo latencia en servidores públicos (8.8.8.8)...','info');},1200);
+  setTimeout(()=>{addLog('20:14','🏓 Latencia promedio: 16 ms','info');},2000);
+  setTimeout(()=>{addLog('20:14','🌐 DNS: resolución correcta (cloudflare.com)','ok');},2500);
+  setTimeout(()=>{addLog('20:14','🔁 Puerta de enlace local detectada','info');},3000);
+  setTimeout(()=>{addLog('20:14','💡 Sugerencias para restaurar la conexión','info');},3600);
+  setTimeout(()=>{
+    addLog('20:15','✅ Diagnóstico completado','ok');
+    addLog('20:15','RESUMEN: 🌐 Conexión activa | 🏓 16 ms | 🌐 DNS OK','ok');
+    btn.disabled=false; btn.textContent='🔍 Diagnostico';
+    showResults();
+  },4200);
+}
+function showResults(){
+  $('#resultsCard').classList.remove('hidden');
+  $('#sumIcon').textContent='🌐 Conexión activa';
+  $('#sumText').textContent='Todo funciona correctamente';
+}
+function clearLogs(){const l=$('#logBody');while(l.firstChild)l.removeChild(l.firstChild);}
+renderChips();
+addLog('00:00','Netckore listo — espera un diagnóstico','info');
+</script>
+</body>
+</html>

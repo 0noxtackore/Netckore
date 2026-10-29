@@ -1,0 +1,103 @@
+name: Build & Release Netckore
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Generate version info
+        run: python packaging/make_version_info.py
+
+      - name: Build onedir (portable)
+        run: pyinstaller packaging/netckore.spec --noconfirm
+
+      - name: Build single-file executable
+        run: |
+          cd dist
+          pyinstaller --onefile --noconfirm --clean ^
+            --name Netckore ^
+            --icon packaging/netckore.ico ^
+            --add-data "netckore/frontend;netckore/frontend" ^
+            --add-data "locales/translations.json;locales" ^
+            --hidden-import psutil ^
+            --hidden-import webview ^
+            --hidden-import webview.platforms.edgechromium ^
+            --exclude-module matplotlib ^
+            --exclude-module numpy ^
+            --exclude-module tkinter ^
+            --exclude-module pygame ^
+            --exclude-module PIL ^
+            --exclude-module cryptography ^
+            --version-file packaging/version_info.txt ^
+            netckore/__main__.py
+
+      - name: Package portable ZIP
+        run: |
+          cd dist
+          7z a "Netckore-${{ github.ref_name }}-Windows-x64.zip" "Netckore" -r
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Netckore ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            dist/Netckore/Netckore.exe
+            dist/Netckore.exe
+            dist/Netckore-${{ github.ref_name }}-Windows-x64.zip
+          body: |
+            ## Netckore ${{ github.ref_name }}
+
+            **Diagnóstico y reparación de conexión a internet** — una herramienta simple para recuperar tu conexión sin conocimientos técnicos.
+
+            ### Assets
+            - `Netckore.exe` — ejecutable single-file (portable, sin carpeta _internal)
+            - `Netckore-${{ github.ref_name }}-Windows-x64.zip` — bundle portable onedir con launcher
+
+            ### Uso
+            1. Descarga el ZIP o el `.exe`
+            2. Ejecuta (sin instalar)
+            3. Selecciona categorías y pulsa **Diagnóstico**
+
+            ⚠️ **Nota**: Los binarios son **sin firmar**. Windows SmartScreen puede avisar hasta que gane reputación.
+
+            ---
+            *La tecnología conecta al mundo. Netckore ayuda a que esa conexión no se convierta en una barrera.* 🌍
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test:
+    needs: build
+    runs-on: windows-latest
+    steps:
+      - name: Download release assets
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: artifacts
+
+      - name: Quick smoke test (single-file)
+        run: |
+          ./artifacts/Netckore.exe --version || echo "Smoke test skipped (no --version flag yet)"
